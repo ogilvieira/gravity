@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Gravity</title>
+	<style>
+	body {
+		overflow: hidden;
+	}
+		canvas {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			margin: auto;
+		}
+	</style>
+</head>
+<body>
+	<script>
+		// start program when page is loaded
+		window.onload = function(){
+			// create canvas object
+			var canvas = document.createElement("canvas"),
+				width = canvas.width = window.innerWidth,
+				height = canvas.height = window.innerHeight;
+				context = canvas.getContext("2d");
+			//add a little style
+			canvas.style.background = "#000";
+
+			// add canvas to body
+			document.body.appendChild(canvas);
+
+			// define enviroment variables
+			var gravidade = 0.5,
+				resistencia = 0.999;
+				points = [];
+
+			var renderPoints = function() {
+				context.clearRect( 0, 0, width, height);
+				for(var i = 0; i < points.length; i++){
+					var p = points[i];
+					context.beginPath();
+					context.fillStyle = points[i].color();
+					context.arc(p.x, p.y, 50, 0, Math.PI * 2);
+					context.stroke();
+					context.fill();
+				}
+			};
+
+			var updatePoints = function(){
+
+				for(var i = 0; i < points.length; i++){
+					var p = points[i], vx = 0, vy = 0;
+
+					vx = (p.x - p.oldx) * resistencia;
+					vy = (p.y - p.oldy) * resistencia;
+
+					p.oldx = p.x;
+					p.oldy = p.y;
+
+					p.x += vx;
+					p.y += vy;
+
+					p.y += gravidade;
+
+					if(p.x > width){
+						p.x = width;
+						p.oldx = p.x + vx; //vx fica negabiva
+					}
+					else if (p.x < 0){
+						p.x = 0;
+						p.oldx = p.x + vx;
+					}
+
+					if(p.y > height){
+						p.y = height;
+						p.oldy = p.y + vy;
+					}
+					else if (p.y < 0){
+						p.y = 0;
+						p.oldy = p.y + vy;
+					}
+
+					if(p.y == p.oldy && p.x == p.oldx){
+						points.splice(i, 1);
+					}
+				}
+			};
+
+			var update = function(){
+				updatePoints();
+				renderPoints();
+				requestAnimationFrame(update);
+			};
+
+			update();
+
+			document.onclick = function(e){
+				points.push({
+					x: e.clientX,
+					y: e.clientY,
+					oldx: e.clientX+5,
+					oldy: e.clientY-5,
+					color: function(){ return '#'+(Math.random()*0xFFFFFF<<0).toString(16); }
+				});
+			}
+		}
+	</script>
+	
+</body>
+</html>
